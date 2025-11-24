@@ -1,0 +1,14 @@
+data:
+  raw_path: "data/raw/clothing-dataset-small"
+  num_classes: 10
+
+model:
+  base_model: "xception"
+  [cite_start]input_shape: [299, 299, 3]  # Se aumentó a 299x299 para mejorar precisión 
+  [cite_start]learning_rate: 0.001        # Tasa de aprendizaje óptima encontrada 
+  [cite_start]inner_layer_size: 100       # Tamaño de capa densa interna 
+  [cite_start]dropout_rate: 0.5           # Mejor tasa de dropout para evitar overfitting 
+
+training:
+  [cite_start]batch_size: 32              # Tamaño de lote estándar 
+  [cite_start]epochs: 20                  # Épocas para el modelo grande 

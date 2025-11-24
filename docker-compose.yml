@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    image: fashion-api:v1
+    container_name: fashion_api_container
+    ports:
+      - "8000:8000"
+    volumes:
+      # Opcional: Montar la carpeta models para cambiar el modelo sin reconstruir
+      - ./models:/app/models
+    environment:
+      - APP_ENV=production
+    restart: unless-stopped
