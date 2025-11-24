@@ -1,39 +1,35 @@
+import yaml
 from tensorflow import keras
-from tensorflow.keras.applications.xception import Xception
+from src.features.build_features import get_data_generators
+from src.models.model_arch import build_xception_model
 
-def build_xception_model(config):
-    input_shape = tuple(config['model']['input_shape'])
-    learning_rate = config['model']['learning_rate']
-    drop_rate = config['model']['dropout_rate']
-    
-    # 1. Cargar modelo base pre-entrenado en ImageNet 
-    base_model = Xception(
-        weights='imagenet',
-        include_top=False,
-        input_shape=input_shape
+def train():
+    # Cargar configuración
+    with open("config/config.yaml") as f:
+        config = yaml.safe_load(f)
+
+    # Obtener datos
+    train_ds, val_ds = get_data_generators()
+
+    # Construir modelo
+    model = build_xception_model(config)
+
+    # Callback para guardar el mejor modelo (Checkpointing) 
+    checkpoint = keras.callbacks.ModelCheckpoint(
+        "models/xception_v4_large_{epoch:02d}_{val_accuracy:.3f}.h5",
+        save_best_only=True,
+        monitor="val_accuracy",
+        mode="max"
     )
-    base_model.trainable = False # Congelar pesos 
 
-    # 2. Construir la cabecera del modelo 
-    inputs = keras.Input(shape=input_shape)
-    base = base_model(inputs, training=False)
-    vector = keras.layers.GlobalAveragePooling2D()(base)
-    
-    # Capa interna densa con activación ReLU
-    inner = keras.layers.Dense(100, activation='relu')(vector)
-    
-    # Dropout para regularización
-    drop = keras.layers.Dropout(drop_rate)(inner)
-    
-    # Capa de salida (10 clases)
-    outputs = keras.layers.Dense(10)(drop) # Logits por defecto con from_logits=True
+    # Entrenar 
+    print("Iniciando entrenamiento...")
+    history = model.fit(
+        train_ds,
+        epochs=config['training']['epochs'],
+        validation_data=val_ds,
+        callbacks=[checkpoint]
+    )
 
-    model = keras.Model(inputs, outputs)
-
-    # 3. Compilar con Adam y Learning Rate ajustado 
-    optimizer = keras.optimizers.Adam(learning_rate=learning_rate)
-    loss = keras.losses.CategoricalCrossentropy(from_logits=True)
-
-    model.compile(optimizer=optimizer, loss=loss, metrics=["accuracy"])
-    
-    return model
+if __name__ == "__main__":
+    train()

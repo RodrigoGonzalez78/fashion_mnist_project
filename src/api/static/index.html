@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clasificador de Ropa AI</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        h1 { color: #333; margin-bottom: 1.5rem; font-size: 1.5rem; }
+        .upload-area { border: 2px dashed #ccc; padding: 20px; border-radius: 10px; margin-bottom: 20px; cursor: pointer; transition: 0.3s; position: relative; overflow: hidden; }
+        .upload-area:hover { border-color: #6c5ce7; background-color: #f8f7ff; }
+        .upload-area img { max-width: 100%; max-height: 200px; display: none; border-radius: 5px; }
+        .upload-area p { color: #aaa; margin: 0; }
+        input[type=file] { display: none; }
+        button { background-color: #6c5ce7; color: white; border: none; padding: 12px 24px; border-radius: 5px; font-size: 1rem; cursor: pointer; width: 100%; transition: 0.3s; }
+        button:hover { background-color: #5a49d1; }
+        button:disabled { background-color: #ccc; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 5px; display: none; text-align: left; }
+        .result.success { background-color: #e6fffa; border: 1px solid #38b2ac; color: #2c7a7b; }
+        .result h3 { margin: 0 0 10px 0; text-transform: capitalize; }
+        .bar-container { background-color: #ddd; border-radius: 5px; height: 8px; margin-top: 5px; overflow: hidden; }
+        .bar { height: 100%; background-color: #38b2ac; width: 0%; transition: width 0.5s; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>👚 Fashion AI Classifier</h1>
+    
+    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+        <p id="uploadText">Click para subir imagen</p>
+        <img id="preview" alt="Preview">
+        <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
+    </div>
+
+    <button id="predictBtn" onclick="predict()" disabled>Identificar Prenda</button>
+
+    <div id="resultCard" class="result success">
+        <h3>Resultado: <span id="predictionLabel">--</span></h3>
+        <small>Confianza:</small>
+        <div class="bar-container">
+            <div id="confidenceBar" class="bar"></div>
+        </div>
+        <p style="margin-top: 5px; font-size: 0.9rem;" id="confidenceText"></p>
+    </div>
+</div>
+
+<script>
+    let selectedFile = null;
+
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('preview');
+                img.src = e.target.result;
+                img.style.display = 'block';
+                document.getElementById('uploadText').style.display = 'none';
+                document.getElementById('predictBtn').disabled = false;
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    async function predict() {
+        if (!selectedFile) return;
+
+        const btn = document.getElementById('predictBtn');
+        btn.innerText = "Analizando...";
+        btn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        try {
+            // Petición a la API
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            // Mostrar resultados
+            document.getElementById('resultCard').style.display = 'block';
+            document.getElementById('predictionLabel').innerText = data.prediction;
+            
+            const confidencePercent = (data.confidence * 100).toFixed(1) + '%';
+            document.getElementById('confidenceBar').style.width = confidencePercent;
+            document.getElementById('confidenceText').innerText = confidencePercent;
+
+        } catch (error) {
+            alert("Error al conectar con la API");
+            console.error(error);
+        } finally {
+            btn.innerText = "Identificar Prenda";
+            btn.disabled = false;
+        }
+    }
+</script>
+
+</body>
+</html>

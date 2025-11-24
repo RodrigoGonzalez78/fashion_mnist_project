@@ -1,7 +1,9 @@
+import os
 import io
 import numpy as np
 from PIL import Image
 from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.responses import FileResponse
 from tensorflow import keras
 from tensorflow.keras.applications.xception import preprocess_input
 
@@ -57,7 +59,16 @@ def prepare_image(image_bytes):
 
 @app.get("/")
 def home():
-    return {"message": "API de Clasificación de Ropa funcionando. Ve a /docs para probarla."}
+    """
+    Sirve el archivo index.html ubicado en src/api/static/
+    """
+    # Ajustamos la ruta para que funcione tanto local como en Docker
+    file_path = "src/api/static/index.html"
+    
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    else:
+        return {"message": "Archivo index.html no encontrado. Revisa la ruta."}
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):

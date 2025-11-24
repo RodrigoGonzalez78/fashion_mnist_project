@@ -1,5 +1,5 @@
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.applications.xception import preprocess_input # [cite: 1683]
+from tensorflow.keras.applications.xception import preprocess_input 
 import yaml
 
 def get_data_generators(config_path="config/config.yaml"):

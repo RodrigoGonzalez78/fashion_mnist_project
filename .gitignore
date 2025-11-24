@@ -1,0 +1,43 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Entornos Virtuales ---
+# Es crítico no subir esto
+venv/
+env/
+.venv/
+.env
+
+# --- Datos ---
+# Los datos suelen ser pesados y no deben estar en el repo
+data/raw/
+data/processed/
+# Excepción: Mantener la estructura de carpetas (opcional, si usas .gitkeep)
+# !data/raw/.gitkeep
+
+# --- Modelos ---
+# Los binarios de modelos (.h5, .tflite) suelen pesar >100MB
+# Es mejor descargarlos o generarlos con scripts
+models/*.h5
+models/*.tflite
+# Si tienes checkpoints de entrenamiento
+models/checkpoints/
+
+# --- Configuración de IDEs ---
+# Archivos de configuración de tu editor de código
+.vscode/
+.idea/
+
+# --- Jupyter Notebooks ---
+# Checkpoints automáticos de Jupyter
+.ipynb_checkpoints
+
+# --- Sistema Operativo ---
+.DS_Store
+Thumbs.db
+
+# --- Logs y reportes temporales ---
+*.log
+reports/
